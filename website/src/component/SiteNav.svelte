@@ -1,23 +1,6 @@
 <script lang="ts">
     import { page } from '$app/state';
-    import { 
-        Collapse,
-        Navbar,
-        NavbarToggler,
-        NavbarBrand,
-        Nav,
-        NavItem,
-        NavLink,
-        Dropdown,
-        DropdownToggle,
-        DropdownMenu,
-        DropdownItem,
-
-        colorMode,
-        Icon,
-
-        Button
-    } from '@sveltestrap/sveltestrap';
+    import { Github } from '@lucide/svelte';
 
     interface MenuItem {
         label: string;
@@ -79,94 +62,90 @@
         const itemPath = normalizePath(href);
         return currentPath === itemPath;
     }
-        
-    // Depending on the screen size, the menu is open or closed
-    // This is a hack to make the menu open on large screens by default, and close on small screens
-    let isOpen = $state(false);
-    if (typeof window !== 'undefined' && window.innerWidth > 992) {
-        isOpen = true;
-    }
-    const toggle = () => (isOpen = !isOpen);
 
-    // Initialize theme from localStorage using Sveltestrap's colorMode
-    // Sveltestrap's colorMode store handles DOM updates automatically
-    if (typeof window !== 'undefined') {
-        try {
-            const storedTheme = localStorage.getItem('theme');
-            if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'auto')) {
-                colorMode.set(storedTheme as 'light' | 'dark' | 'auto');
-            }
-        } catch (error) {
-            console.error('Error reading theme from local storage:', error);
+    // Track mobile menu state
+    let isMobileMenuOpen = $state(false);
+
+    // Toggle mobile menu
+    function toggleMenu() {
+        console.log('toggleMenu', isMobileMenuOpen);
+        isMobileMenuOpen = !isMobileMenuOpen;
+    }
+
+    // Track which dropdown is currently open
+    let openDropdown = $state<string | null>(null);
+
+    // Toggle dropdown for a specific category
+    function toggleDropdown(categoryId: string) {
+        if (openDropdown === categoryId) {
+            openDropdown = null;
+        } else {
+            openDropdown = categoryId;
         }
     }
-    
-    // Sync colorMode changes to localStorage
-    // Sveltestrap's Styles component handles DOM theme updates via data-bs-theme attribute
-    $effect(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-        
-        const theme = $colorMode;
-        
-        try {
-            localStorage.setItem('theme', theme);
-        } catch (error) {
-            console.error('Error saving theme to local storage:', error);
-        }
-    });
+
+    // Check if a dropdown is open
+    function isDropdownOpen(categoryId: string): boolean {
+        return openDropdown === categoryId;
+    }
 </script>
 
-<Navbar color="dark" dark theme="dark" expand="md" class="border-bottom border-body-tertiary" sticky="top">
-<NavbarBrand href="/">FFXIV Gacha</NavbarBrand>
-<NavbarToggler onclick={toggle} />
+<nav class="navbar is-dark" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+            <strong>FFXIV Gacha</strong>
+        </a>
 
-<Collapse {isOpen} navbar expand="md">
-    <!-- Main Menu -->
-    <Nav class="me-auto" navbar>
-        {#each menuCategories as category}
-            <NavItem>
-                <Dropdown nav>
-                    <DropdownToggle nav class="nav-link" caret>
+        <button 
+            type="button" 
+            class="navbar-burger" 
+            class:is-active={isMobileMenuOpen}
+            aria-label="menu" 
+            aria-expanded={isMobileMenuOpen}
+            data-target="mainNavbar" 
+            onclick={toggleMenu}
+        >
+            <!-- Keep 4 spans for the burger icon -->
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </button>
+    </div>
+
+    <div id="mainNavbar" class="navbar-menu" class:is-active={isMobileMenuOpen}>
+        <div class="navbar-start">
+            {#each menuCategories as category}
+                <div class="navbar-item has-dropdown" class:is-active={isDropdownOpen(category.id)}>
+                    <button 
+                        type="button" 
+                        class="navbar-link" 
+                        onclick={() => toggleDropdown(category.id)}
+                        aria-expanded={isDropdownOpen(category.id)}
+                        aria-haspopup="true"
+                    >
                         {category.label}
-                    </DropdownToggle>
-                    <DropdownMenu>
+                    </button>
+
+                    <div class="navbar-dropdown">
                         {#each category.items as item}
-                            <DropdownItem href={item.href} active={isActivePath(item.href)}>
+                            <a class="navbar-item" href={item.href} class:is-active={isActivePath(item.href)}>
                                 {item.label}
-                            </DropdownItem>
+                            </a>
                         {/each}
-                    </DropdownMenu>
-                </Dropdown>
-            </NavItem>
-        {/each}
-    </Nav>
+                    </div>
+                </div>
+            {/each}
+        </div>
 
-    <!-- Social Menu -->
-    <Nav class="ms-auto" navbar>
-        <NavItem>
-            <NavLink href="/about">About</NavLink>
-        </NavItem>
-        <NavItem>
-            <NavLink href="https://github.com/Infiziert90/FFXIVGachaSpreadsheet" target="_blank">
-                <Icon name="github" class="text-white"/>
-                <span class="visually-hidden">GitHub</span>
-            </NavLink>
-        </NavItem>
-
-        <NavItem>
-            <Dropdown nav>
-                <DropdownToggle nav caret>
-                    <Icon name={$colorMode === 'light' ? 'sun-fill' : $colorMode === 'dark' ? 'moon-stars-fill' : 'circle-half'} />
-                </DropdownToggle>
-                <DropdownMenu end>
-                    <DropdownItem onclick={() => colorMode.set('light')} active={$colorMode === 'light'}>Light <Icon name="sun-fill" /></DropdownItem>
-                    <DropdownItem onclick={() => colorMode.set('dark')} active={$colorMode === 'dark'}>Dark <Icon name="moon-stars-fill" /></DropdownItem>
-                    <DropdownItem onclick={() => colorMode.set('auto')} active={$colorMode === 'auto'}>Auto <Icon name="circle-half" /></DropdownItem>
-                </DropdownMenu>
-            </Dropdown>
-        </NavItem>
-    </Nav>
-</Collapse>
-</Navbar>
+        <div class="navbar-end">
+            <a class="navbar-item" href="/about">
+                About
+            </a>
+            <a class="navbar-item" href="https://github.com/Infiziert90/FFXIVGachaSpreadsheet" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                <Github />
+                <span class="is-sr-only">GitHub</span>
+            </a>
+        </div>
+    </div>
+</nav>

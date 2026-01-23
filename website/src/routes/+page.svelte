@@ -14,14 +14,20 @@
 </svelte:head>
 
 <div class="col-12">
-    <h1 class="text-body-emphasis">Final Fantasy 14 %-Stats</h1>
-
-    <p>
-        <strong>Last Update</strong>:
-        {#await getLastUpdate(browser) then value}
-            {value}
-        {/await}
-    </p>
+    <section class="hero">
+        <div class="hero-body">
+            <p class="title">Final Fantasy 14 %-Stats</p>
+            {#await getLastUpdate(browser)}
+                <p class="subtitle has-skeleton">
+                Last Update:
+                </p>
+            {:then value}
+                <p class="subtitle">
+                    Last Update: {value}
+                </p>
+            {/await}
+        </div>
+      </section>
 
     <p>Legend:</p>
     <blockquote>
