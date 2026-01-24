@@ -27,23 +27,10 @@
                 </p>
             {/await}
         </div>
-      </section>
+    </section>
 
-    <p>Legend:</p>
-    <blockquote>
-        <p>
-            “Name” - Name of the item<br>
-            “Obtained” - Number of times the item was received<br>
-            “Total” - Total number of items received<br>
-            “Chance” - % in relation to all records
-        </p>
-    </blockquote>
-    <blockquote>
-        <p>Keep in mind that every draw is based on randomness, so values can vary slightly for each individual</p>
-    </blockquote>
-
-    <h3 id="content">Content</h3>
-    <div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
+    <!-- <div class="row row-cols-1 row-cols-md-3 g-4 mb-3"> -->
+    <div class="columns is-multiline">
         <CardLink cardTitle={'Random Coffers'} cardIcon={'061000/061812'} cardLink={'coffer/'} />
         <CardLink cardTitle={'Lockboxes'} cardIcon={'061000/061808'} cardLink={'lockbox/'} />
         <CardLink cardTitle={'Card Packs'} cardIcon={'061000/061820'} cardLink={'card/'} />
